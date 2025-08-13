@@ -1,0 +1,401 @@
+{
+  "phone": {
+    "name": "Téléphone",
+    "icon": "📞",
+    "questions": [
+      {
+        "id": "phone-q1",
+        "question": "Le téléphone s'allume-t-il ?",
+        "yes": {
+          "next": "phone-q2"
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Vérifier l'alimentation"
+            },
+            {
+              "role": "Utilisateur",
+              "type": "Info",
+              "action": "Informé de la vérification"
+            },
+            {
+              "role": "Responsable Support",
+              "type": "Validation",
+              "action": "Valide le remplacement"
+            }
+          ]
+        }
+      },
+      {
+        "id": "phone-q2",
+        "question": "Y a-t-il de la tonalité ?",
+        "yes": {
+          "next": "phone-q3"
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Support",
+              "action": "Vérifier configuration"
+            },
+            {
+              "role": "Technicien N2",
+              "type": "Action",
+              "action": "Diagnostic approfondi"
+            },
+            {
+              "role": "Responsable Support",
+              "type": "Validation",
+              "action": "Approuve l'escalade"
+            }
+          ]
+        }
+      },
+      {
+        "id": "phone-q3",
+        "question": "Les appels entrants fonctionnent ?",
+        "yes": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Configurer appels sortants"
+            },
+            {
+              "role": "Fournisseur",
+              "type": "Support",
+              "action": "Paramètres opérateur"
+            }
+          ]
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Technicien N2",
+              "type": "Action",
+              "action": "Analyse routage"
+            },
+            {
+              "role": "DSI",
+              "type": "Info",
+              "action": "Informé si impact majeur"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "tablet": {
+    "name": "Tablette",
+    "icon": "📱",
+    "questions": [
+      {
+        "id": "tablet-q1",
+        "question": "La tablette s'allume-t-elle ?",
+        "yes": {
+          "next": "tablet-q2"
+        },
+        "no": {
+          "next": "tablet-q1-1"
+        }
+      },
+      {
+        "id": "tablet-q1-1",
+        "question": "La batterie est-elle chargée ?",
+        "yes": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Diagnostic matériel"
+            },
+            {
+              "role": "SAV",
+              "type": "Support",
+              "action": "Retour si sous garantie"
+            }
+          ]
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Tester autre chargeur"
+            },
+            {
+              "role": "SAV",
+              "type": "Support",
+              "action": "Si batterie défectueuse"
+            }
+          ]
+        }
+      },
+      {
+        "id": "tablet-q2",
+        "question": "L'écran tactile répond-il ?",
+        "yes": {
+          "next": "tablet-q3"
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Nettoyer écran et redémarrer"
+            },
+            {
+              "role": "SAV",
+              "type": "Support",
+              "action": "Si écran fissuré"
+            }
+          ]
+        }
+      },
+      {
+        "id": "tablet-q3",
+        "question": "Les applications fonctionnent ?",
+        "yes": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Formation utilisateur"
+            },
+            {
+              "role": "Utilisateur",
+              "type": "Info",
+              "action": "Documentation remise"
+            }
+          ]
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Réinstaller applications"
+            },
+            {
+              "role": "Éditeur",
+              "type": "Support",
+              "action": "Support licences"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "tv": {
+    "name": "TV",
+    "icon": "📺",
+    "questions": [
+      {
+        "id": "tv-q1",
+        "question": "La TV s'allume-t-elle ?",
+        "yes": {
+          "next": "tv-q2"
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Vérifier alimentation"
+            },
+            {
+              "role": "Maintenance",
+              "type": "Support",
+              "action": "Vérifier prise électrique"
+            }
+          ]
+        }
+      },
+      {
+        "id": "tv-q2",
+        "question": "Y a-t-il de l'image ?",
+        "yes": {
+          "next": "tv-q3"
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Vérifier câbles HDMI"
+            },
+            {
+              "role": "Intégrateur AV",
+              "type": "Support",
+              "action": "Si système complexe"
+            }
+          ]
+        }
+      },
+      {
+        "id": "tv-q3",
+        "question": "Le son fonctionne ?",
+        "yes": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Former sur utilisation"
+            },
+            {
+              "role": "Utilisateur",
+              "type": "Info",
+              "action": "Guide remis"
+            }
+          ]
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Réglages audio"
+            },
+            {
+              "role": "Utilisateur",
+              "type": "Support",
+              "action": "Tester sources"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "pms": {
+    "name": "PMS Hoppen",
+    "icon": "💻",
+    "questions": [
+      {
+        "id": "pms-q1",
+        "question": "Le PMS se lance-t-il ?",
+        "yes": {
+          "next": "pms-q2"
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Support",
+              "action": "Vérifier services Windows"
+            },
+            {
+              "role": "Support Hoppen",
+              "type": "Action",
+              "action": "Diagnostic serveur"
+            },
+            {
+              "role": "DSI",
+              "type": "Info",
+              "action": "Si impact critique"
+            }
+          ]
+        }
+      },
+      {
+        "id": "pms-q2",
+        "question": "La connexion fonctionne ?",
+        "yes": {
+          "next": "pms-q3"
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Réinitialiser mot de passe"
+            },
+            {
+              "role": "Admin PMS",
+              "type": "Support",
+              "action": "Vérifier compte utilisateur"
+            }
+          ]
+        }
+      },
+      {
+        "id": "pms-q3",
+        "question": "La facturation fonctionne ?",
+        "yes": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Support utilisateur"
+            },
+            {
+              "role": "Utilisateur",
+              "type": "Info",
+              "action": "Ticket clos"
+            }
+          ]
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Support Hoppen",
+              "type": "Action",
+              "action": "Corriger configuration"
+            },
+            {
+              "role": "Comptabilité",
+              "type": "Info",
+              "action": "Informé du problème"
+            },
+            {
+              "role": "DSI",
+              "type": "Validation",
+              "action": "Valider corrections"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "sav": {
+    "name": "SAV Produit",
+    "icon": "🔧",
+    "questions": [
+      {
+        "id": "sav-q1",
+        "question": "Le produit est sous garantie ?",
+        "yes": {
+          "raci": [
+            {
+              "role": "Technicien N1",
+              "type": "Action",
+              "action": "Créer ticket SAV"
+            },
+            {
+              "role": "Fournisseur",
+              "type": "Support",
+              "action": "Prise en charge"
+            }
+          ]
+        },
+        "no": {
+          "raci": [
+            {
+              "role": "Responsable",
+              "type": "Action",
+              "action": "Validation devis"
+            },
+            {
+              "role": "Achats",
+              "type": "Support",
+              "action": "Remplacement"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
