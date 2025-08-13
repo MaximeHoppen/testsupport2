@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Assistance Support HOPPEN - Guide décisionnel RACI">
+    <meta name="author" content="HOPPEN">
+    <title>Assistance Support - HOPPEN</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#5B3A99 0%,#7B5CAD 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:white;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden}
+        .header{background:linear-gradient(135deg,#5B3A99 0%,#7B5CAD 100%);color:white;padding:30px;padding-top:80px;text-align:center;position:relative;min-height:160px}
+        .logo-container{position:absolute;top:12px;left:15px;display:flex;align-items:center;gap:15px;z-index:90}
+        .header h1{font-size:28px;margin-bottom:10px}
+        .header p{opacity:0.9;font-size:14px}
+        .header-actions{position:absolute;top:12px;right:15px;display:flex;gap:6px;z-index:100;max-width:65%;flex-wrap:wrap;justify-content:flex-end}
+        .header-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;transition:all 0.3s;white-space:nowrap}
+        .header-btn:hover{background:rgba(255,255,255,0.3);transform:translateY(-2px)}
+        .content{padding:30px}
+        .section{display:none;animation:fadeIn 0.3s ease-in-out}
+        .section.active{display:block}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .hardware-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:30px}
+        .hardware-btn{padding:20px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.3s ease;text-align:center;position:relative}
+        .hardware-btn:hover{transform:translateY(-5px);box-shadow:0 10px 30px rgba(0,0,0,0.1);border-color:#667eea}
+        .hardware-btn.dragging{opacity:0.5;transform:scale(0.95)}
+        .hardware-btn.drag-over{border:3px dashed #667eea;background:#f0f4ff}
+        .hardware-btn .icon{font-size:40px;margin-bottom:10px}
+        .hardware-btn .label{font-size:14px;color:#4a5568;font-weight:600}
+        .edit-mode .hardware-btn .label{background:#fffbeb;padding:2px 6px;border-radius:4px;display:inline-block}
+        .add-btn{background:linear-gradient(135deg,#5B3A99 0%,#7B5CAD 100%);color:white}
+        .add-btn .icon{color:white}
+        .add-btn .label{color:white}
+        .question-box{background:#f7fafc;padding:25px;border-radius:12px;margin-bottom:20px;position:relative}
+        .question-box h3{color:#2d3748;margin-bottom:20px;font-size:18px}
+        .btn-group{display:flex;gap:15px;margin-top:20px;flex-wrap:wrap}
+        .btn{flex:1;min-width:100px;padding:12px 24px;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s ease}
+        .btn-yes{background:#48bb78;color:white}
+        .btn-yes:hover{background:#38a169;transform:translateY(-2px)}
+        .btn-no{background:#fc8181;color:white}
+        .btn-no:hover{background:#f56565;transform:translateY(-2px)}
+        .btn-back{background:#a0aec0;color:white}
+        .btn-back:hover{background:#718096}
+        .raci-result{background:white;border:2px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:20px}
+        .raci-item{display:flex;align-items:center;padding:15px;border-bottom:1px solid #e2e8f0;position:relative}
+        .raci-item:last-child{border-bottom:none}
+        .raci-badge{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;margin-right:15px;font-size:18px;cursor:pointer}
+        .badge-r{background:#f56565}
+        .badge-a{background:#ed8936}
+        .badge-c{background:#48bb78}
+        .badge-i{background:#4299e1}
+        .badge-custom{background:#9f7aea}
+        .raci-type-selector{display:inline-block;margin-left:10px;padding:2px 6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;cursor:pointer}
+        .raci-type-selector:hover{background:#f7fafc}
+        .raci-content{flex:1}
+        .raci-role{font-weight:600;color:#2d3748;margin-bottom:5px}
+        .raci-action{color:#718096;font-size:14px}
+        .breadcrumb{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;padding:15px;background:#edf2f7;border-radius:8px;font-size:14px;color:#4a5568}
+        .breadcrumb-item{display:flex;align-items:center}
+        .breadcrumb-item::after{content:"→";margin:0 10px}
+        .breadcrumb-item:last-child::after{display:none}
+        .delete-category{position:absolute;top:5px;right:5px;background:#fc8181;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;font-size:12px;display:none}
+        .edit-mode .delete-category{display:block!important}
+        .hardware-btn:hover .delete-category{display:block}
+        .move-buttons{position:absolute;top:5px;left:5px;display:none;gap:2px}
+        .edit-mode .move-buttons{display:flex}
+        .move-btn{background:#4299e1;color:white;border:none;border-radius:4px;width:20px;height:20px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+        .move-btn:hover{background:#3182ce}
+        .edit-badge{position:fixed;top:70px;left:20px;background:#f6ad55;color:white;padding:8px 16px;border-radius:20px;font-weight:bold;z-index:1000;display:none;animation:pulse 2s infinite}
+        @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+        .edit-mode .edit-badge{display:block}
+        .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);animation:fadeIn 0.3s ease}
+        .modal.active{display:flex;align-items:center;justify-content:center}
+        .modal-content{background:white;padding:30px;border-radius:20px;width:90%;max-width:600px;max-height:85vh;overflow-y:auto;animation:slideIn 0.3s ease}
+        @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
+        .modal-header{margin-bottom:20px}
+        .modal-header h2{color:#2d3748;margin-bottom:10px}
+        .form-group{margin-bottom:20px}
+        .form-group label{display:block;margin-bottom:8px;color:#4a5568;font-weight:600}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:8px;font-size:16px;font-family:inherit}
+        .form-group textarea{min-height:100px;resize:vertical}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#667eea}
+        .emoji-picker{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin-top:10px;max-height:200px;overflow-y:auto;padding:10px;background:#f7fafc;border-radius:8px}
+        .emoji-option{padding:8px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;text-align:center;font-size:20px;transition:all 0.2s}
+        .emoji-option:hover{background:#edf2f7;border-color:#667eea;transform:scale(1.1)}
+        .emoji-option.selected{background:#667eea;border-color:#667eea}
+        .btn-primary{background:linear-gradient(135deg,#5B3A99 0%,#7B5CAD 100%);color:white;padding:12px 24px;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;margin-right:10px}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(102,126,234,0.4)}
+        .btn-secondary{background:#e2e8f0;color:#4a5568;padding:12px 24px;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer}
+        .btn-secondary:hover{background:#cbd5e0}
+        .stats-panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:20px}
+        .stat-card{background:linear-gradient(135deg,#5B3A99 0%,#7B5CAD 100%);color:white;padding:20px;border-radius:12px;text-align:center}
+        .stat-number{font-size:32px;font-weight:bold;margin-bottom:5px}
+        .stat-label{font-size:14px;opacity:0.9}
+        .tabs{display:flex;gap:10px;margin-bottom:20px;border-bottom:2px solid #e2e8f0}
+        .tab{padding:10px 20px;background:none;border:none;color:#718096;cursor:pointer;font-size:16px;font-weight:600;border-bottom:3px solid transparent;transition:all 0.3s}
+        .tab.active{color:#667eea;border-bottom-color:#667eea}
+        .tree-view{padding:20px;background:#f7fafc;border-radius:12px;margin-top:20px}
+        .tree-node{margin-left:20px;margin-top:10px;padding:10px;background:white;border-radius:8px;border:2px solid #e2e8f0}
+        .tree-question{font-weight:600;color:#2d3748;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+        .tree-response{margin-left:20px;margin-top:8px;padding:8px;background:#edf2f7;border-radius:6px}
+        .tree-response-label{font-weight:600;color:#4a5568;margin-bottom:5px}
+        .tree-actions{display:flex;gap:5px}
+        .tree-btn{padding:4px 8px;border:none;border-radius:4px;font-size:12px;cursor:pointer}
+        .tree-btn-edit{background:#667eea;color:white}
+        .tree-btn-add{background:#48bb78;color:white}
+        .tree-btn-delete{background:#fc8181;color:white}
+        .tree-btn-up{background:#4299e1;color:white}
+        .tree-btn-down{background:#4299e1;color:white}
+        .category-header{display:flex;justify-content:space-between;align-items:center;padding:15px;background:linear-gradient(135deg,#5B3A99 0%,#7B5CAD 100%);color:white;border-radius:8px;margin-bottom:15px}
+        .category-title{font-size:20px;font-weight:bold;display:flex;align-items:center;gap:10px}
+        .editable-field{background:rgba(255,255,255,0.1);border:1px dashed rgba(255,255,255,0.3);padding:2px 8px;border-radius:4px;cursor:text}
+        .editable-field:hover{background:rgba(255,255,255,0.2)}
+        .editable-field:focus{outline:none;background:white;color:#2d3748}
+        @media(max-width:768px){.hardware-grid{grid-template-columns:repeat(2,1fr)}.header{padding-top:120px}.header h1{font-size:20px}.header-btn{font-size:11px;padding:5px 8px}.logo-container{top:10px;left:50%;transform:translateX(-50%)}.header-actions{top:60px;right:10px;left:10px;max-width:none;justify-content:center}}
+    </style>
+</head>
+<body>
+<div class="edit-badge">🔧 MODE ÉDITION ACTIF</div>
+<div class="container">
+    <div class="header">
+        <div class="logo-container">
+            <div style="background:white;padding:8px 15px;border-radius:6px;font-weight:bold;color:#5B3A99;font-size:18px;letter-spacing:1px">HOPPEN</div>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" onclick="showStats()">📊 Stats</button>
+            <button class="header-btn" onclick="showImportExport()">💾 Import/Export</button>
+            <button class="header-btn" onclick="showTreeView()">🌳 Vue complète</button>
+            <button class="header-btn" onclick="toggleEditMode()">✏️ Mode édition</button>
+            <button class="header-btn" onclick="showHelp()">❓ Aide</button>
+        </div>
+        <h1>🎯 Assistance Support</h1>
+        <p>Guide décisionnel interactif - Sélectionnez votre type de produit</p>
+    </div>
+    <div class="content">
+        <div id="breadcrumb" class="breadcrumb" style="display:none"></div>
+        <div id="hardware-selection" class="section active">
+            <div class="hardware-grid" id="productGrid"></div>
+        </div>
+        <div id="dynamic-content"></div>
+    </div>
+</div>
+
+<div id="addCategoryModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>➕ Ajouter une nouvelle catégorie</h2>
+            <p style="color:#718096;font-size:14px">Créez une nouvelle catégorie avec son arbre de décision</p>
+        </div>
+        <div class="form-group">
+            <label>Nom de la catégorie *</label>
+            <input type="text" id="categoryName" placeholder="Ex: Imprimante, Scanner, etc.">
+        </div>
+        <div class="form-group">
+            <label>Choisir une icône *</label>
+            <div class="emoji-picker" id="emojiPicker"></div>
+        </div>
+        <div class="form-group">
+            <label>Première question *</label>
+            <input type="text" id="firstQuestion" placeholder="Ex: Le produit s'allume-t-il ?">
+        </div>
+        <div class="form-group">
+            <label>Description (optionnel)</label>
+            <textarea id="categoryDescription" placeholder="Description de cette catégorie..."></textarea>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:30px">
+            <button class="btn-primary" onclick="createCategory()">Créer</button>
+            <button class="btn-secondary" onclick="closeModal('addCategoryModal')">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<div id="treeViewModal" class="modal">
+    <div class="modal-content" style="max-width:900px">
+        <div class="modal-header">
+            <h2>🌳 Vue complète du RACI</h2>
+            <p style="color:#718096;font-size:14px">Visualisez et éditez l'ensemble de votre arbre décisionnel</p>
+        </div>
+        <div class="tabs">
+            <button class="tab active" id="categoryTab" onclick="switchTreeTab('category')">Par catégorie</button>
+            <button class="tab" id="compactTab" onclick="switchTreeTab('compact')">Vue compacte</button>
+        </div>
+        <div id="treeContent" style="max-height:500px;overflow-y:auto"></div>
+        <div style="margin-top:30px;display:flex;gap:10px">
+            <button class="btn-primary" onclick="saveTreeChanges()">💾 Sauvegarder</button>
+            <button class="btn-secondary" onclick="closeModal('treeViewModal')">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<div id="editItemModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="editItemTitle">✏️ Éditer</h2>
+        </div>
+        <div id="editItemContent"></div>
+        <div style="margin-top:30px;display:flex;gap:10px">
+            <button class="btn-primary" onclick="saveItemEdit()">Enregistrer</button>
+            <button class="btn-secondary" onclick="closeModal('editItemModal')">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<div id="statsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>📊 Statistiques</h2>
+        </div>
+        <div class="stats-panel" id="statsPanel"></div>
+        <div style="margin-top:30px">
+            <button class="btn-secondary" onclick="closeModal('statsModal')">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<div id="importExportModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>💾 Import/Export</h2>
+        </div>
+        <div class="tabs">
+            <button class="tab active" onclick="switchIETab('export')">Export</button>
+            <button class="tab" onclick="switchIETab('import')">Import</button>
+        </div>
+        <div id="exportTab">
+            <p style="margin-bottom:20px">Exportez votre configuration RACI pour la sauvegarder.</p>
+            <button class="btn-primary" onclick="exportData()">📥 Télécharger</button>
+        </div>
+        <div id="importTab" style="display:none">
+            <p style="margin-bottom:20px">Importez une configuration RACI.</p>
+            <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+        </div>
+        <div style="margin-top:30px">
+            <button class="btn-secondary" onclick="closeModal('importExportModal')">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<div id="helpModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>❓ Guide d'utilisation</h2>
+        </div>
+        <div style="line-height:1.8">
+            <h3 style="color:#2d3748;margin-top:20px">🚀 Démarrage rapide</h3>
+            <p>1. Sélectionnez une catégorie de produit</p>
+            <p>2. Répondez aux questions OUI/NON</p>
+            <p>3. Obtenez le RACI approprié</p>
+            <h3 style="color:#2d3748;margin-top:20px">📋 Légende RACI</h3>
+            <p><span style="color:#f56565">R = Responsable</span> : Réalise l'action</p>
+            <p><span style="color:#ed8936">A = Approbateur</span> : Valide</p>
+            <p><span style="color:#48bb78">C = Consulté</span> : Expertise</p>
+            <p><span style="color:#4299e1">I = Informé</span> : Tenu au courant</p>
+        </div>
+        <div style="margin-top:30px">
+            <button class="btn-secondary" onclick="closeModal('helpModal')">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let raciData = {};
+let raciTypes={Action:{label:"Action",color:"#f56565",description:"Réalise l'action"},Validation:{label:"Validation",color:"#ed8936",description:"Valide/Approuve"},Support:{label:"Support",color:"#48bb78",description:"Apporte son expertise"},Info:{label:"Info",color:"#4299e1",description:"Tenu informé"},Escalade:{label:"Escalade",color:"#9f7aea",description:"Escalade nécessaire"}};
+function getRaciBadgeClass(e){const t=e.toLowerCase();return["r","a","c","i"].includes(t)?"badge-"+t:"badge-custom"}
+function getRaciBadgeStyle(e){const t=raciTypes[e];return t?`background:${t.color}`:"background:#9f7aea"}
+let currentHardware=null,currentQuestion=null,navigationHistory=[],selectedEmoji="📦",editMode=!1,currentTreeView="category",editingItem=null,draggedElement=null,draggedKey=null;
+const emojis=["📞","📱","📺","💻","🔧","🖨️","📠","🖥️","⌨️","🖱️","📷","🎧","🔌","💾","📡","🌐","📊","🔒","🛠️","📦"];
+window.onload = async function(){
+    await loadData();
+    renderProductGrid();
+    renderEmojiPicker();
+};
+async function loadData(){
+    try {
+        const response = await fetch('data.json');
+        if (!response.ok) throw new Error('Erreur HTTP ' + response.status);
+        raciData = await response.json();
+        console.log('✅ Données chargées :', raciData);
+    } catch (e) {
+        console.error('❌ Erreur chargement :', e);
+        raciData = {};
+    }
+} catch (e) {
+        console.error('❌ Erreur chargement data.json :', e);
+        raciData = {};
+    }
+}catch(e){console.error("Erreur chargement:",e)}}
+function saveData() {
+    const json = JSON.stringify(raciData, null, 2);
+    console.log('📋 Copiez-collez ce JSON dans data.json sur GitHub :', json);
+    alert('Données prêtes dans la console (F12). Copiez-les dans data.json sur GitHub pour mise à jour globale.');
+}
+function renderProductGrid(){const e=document.getElementById("productGrid");e.innerHTML="";const t=Object.entries(raciData);t.forEach(([t,n],a)=>{const i=document.createElement("div");i.className="hardware-btn",i.draggable=editMode,i.dataset.key=t,i.dataset.index=a,editMode?(i.innerHTML=`<div class="move-buttons">${a>0?`<button class="move-btn" onclick="moveCategoryLeft('${t}')">←</button>`:""}${a<Object.keys(raciData).length-1?`<button class="move-btn" onclick="moveCategoryRight('${t}')">→</button>`:""}</div><div class="icon" contenteditable="true" onclick="event.stopPropagation()" onblur="updateCategoryIcon('${t}', this.textContent)">${n.icon||"📦"}</div><div class="label" contenteditable="true" onclick="event.stopPropagation()" onblur="updateCategoryLabel('${t}', this.textContent)">${n.name}</div><button class="delete-category" onclick="event.stopPropagation(); deleteCategory('${t}')">✕</button>`,i.onclick=e=>{"true"===e.target.contentEditable?e.stopPropagation():e.target.classList.contains("move-btn")||e.target.classList.contains("delete-category")||selectProduct(t)},i.addEventListener("dragstart",handleDragStart),i.addEventListener("dragend",handleDragEnd),i.addEventListener("dragover",handleDragOver),i.addEventListener("dragleave",handleDragLeave),i.addEventListener("drop",handleDrop)):(i.innerHTML=`<div class="icon">${n.icon||"📦"}</div><div class="label">${n.name}</div><button class="delete-category" onclick="event.stopPropagation(); deleteCategory('${t}')">✕</button>`,i.onclick=()=>selectProduct(t)),e.appendChild(i)});const n=document.createElement("div");n.className="hardware-btn add-btn",n.onclick=()=>showAddCategory(),n.innerHTML='<div class="icon">➕</div><div class="label">Ajouter</div>',e.appendChild(n)}
+function handleDragStart(e){draggedElement=this,draggedKey=this.dataset.key,this.classList.add("dragging"),e.dataTransfer.effectAllowed="move"}
+function handleDragEnd(e){this.classList.remove("dragging"),document.querySelectorAll(".hardware-btn").forEach(e=>{e.classList.remove("drag-over")})}
+function handleDragOver(e){return e.preventDefault&&e.preventDefault(),e.dataTransfer.dropEffect="move",this!==draggedElement&&!this.classList.contains("add-btn")&&this.classList.add("drag-over"),!1}
+function handleDragLeave(e){this.classList.remove("drag-over")}
+function handleDrop(e){return e.stopPropagation&&e.stopPropagation(),this.classList.remove("drag-over"),draggedElement!==this&&!this.classList.contains("add-btn")&&reorderCategories(draggedKey,this.dataset.key),!1}
+function reorderCategories(e,t){const n=Object.entries(raciData),a=n.findIndex(([t])=>t===e),i=n.findIndex(([e])=>e===t);if(-1!==a&&-1!==i){const[e]=n.splice(a,1);n.splice(i,0,e);const t={};n.forEach(([e,n])=>{t[e]=n}),raciData=t,saveData(),renderProductGrid(),showSuccessMessage("Ordre modifié")}}
+function moveCategoryLeft(e){const t=Object.entries(raciData),n=t.findIndex(([t])=>t===e);if(n>0){[t[n-1],t[n]]=[t[n],t[n-1]];const e={};t.forEach(([t,n])=>{e[t]=n}),raciData=e,saveData(),renderProductGrid()}}
+function moveCategoryRight(e){const t=Object.entries(raciData),n=t.findIndex(([t])=>t===e);if(n<t.length-1){[t[n],t[n+1]]=[t[n+1],t[n]];const e={};t.forEach(([t,n])=>{e[t]=n}),raciData=e,saveData(),renderProductGrid()}}
+function updateCategoryIcon(e,t){if(!raciData[e])return;const n=t.trim();n&&n.length<=2&&(raciData[e].icon=n,saveData(),showSuccessMessage("Icône modifiée"))}
+function updateCategoryLabel(e,t){if(!raciData[e])return;const n=t.trim();n&&(raciData[e].name=n,saveData(),showSuccessMessage("Nom modifié"))}
+function selectProduct(e){currentHardware=e;const t=raciData[e];navigationHistory=[t.name],updateBreadcrumb(),document.getElementById("hardware-selection").classList.remove("active"),t.questions&&t.questions.length>0&&showQuestion(t.questions[0])}
+function showQuestion(e){currentQuestion=e;const t=document.getElementById("dynamic-content");t.innerHTML=`<div class="section active"><div class="question-box"><h3>${e.question}</h3><div class="btn-group"><button class="btn btn-yes" onclick="handleAnswer('yes')">✓ OUI</button><button class="btn btn-no" onclick="handleAnswer('no')">✗ NON</button><button class="btn btn-back" onclick="goBack()">← Retour</button></div></div></div>`}
+function handleAnswer(e){const t=currentQuestion[e];if(t.next){const n=findQuestionById(t.next);n&&(navigationHistory.push(e.toUpperCase()),updateBreadcrumb(),showQuestion(n))}else t.raci&&(navigationHistory.push(e.toUpperCase()),updateBreadcrumb(),showRaci(t.raci))}
+function findQuestionById(e){if(!e)return null;for(const[t,n]of Object.entries(raciData))if(n.questions&&Array.isArray(n.questions))for(const t of n.questions)if(t.id===e)return t;return null}
+function showRaci(e){const t=document.getElementById("dynamic-content");let n=e.map(e=>{const t=getRaciBadgeStyle(e.type);return`<div class="raci-item"><div class="raci-badge" style="${t}">${e.type.substring(0,3).toUpperCase()}</div><div class="raci-content"><div class="raci-role">${e.role}</div><div class="raci-action">${e.action}</div></div></div>`}).join("");t.innerHTML=`<div class="section active"><div class="raci-result"><h3>📋 Actions à effectuer</h3>${n}<div class="btn-group"><button class="btn btn-back" onclick="goBack()">← Retour</button><button class="btn btn-back" onclick="restart()">🏠 Recommencer</button></div></div></div>`}
+function updateBreadcrumb(){const e=document.getElementById("breadcrumb");navigationHistory.length>0?(e.style.display="flex",e.innerHTML=navigationHistory.map(e=>`<span class="breadcrumb-item">${e}</span>`).join("")):e.style.display="none"}
+function goBack(){navigationHistory.length>1?(navigationHistory.pop(),updateBreadcrumb(),restart()):restart()}
+function restart(){currentHardware=null,currentQuestion=null,navigationHistory=[],updateBreadcrumb(),document.getElementById("hardware-selection").classList.add("active"),document.getElementById("dynamic-content").innerHTML=""}
+function showAddCategory(){document.getElementById("addCategoryModal").classList.add("active")}
+function renderEmojiPicker(){const e=document.getElementById("emojiPicker");e.innerHTML="",emojis.forEach(t=>{const n=document.createElement("div");n.className="emoji-option",n.textContent=t,n.onclick=function(){document.querySelectorAll(".emoji-option").forEach(e=>e.classList.remove("selected")),this.classList.add("selected"),selectedEmoji=t},e.appendChild(n)})}
+function createCategory(){const e=document.getElementById("categoryName").value.trim(),t=document.getElementById("firstQuestion").value.trim();if(!e||!t)return void alert("Remplissez tous les champs obligatoires");const n="custom_"+Date.now();raciData[n]={name:e,icon:selectedEmoji,custom:!0,questions:[{id:n+"_q1",question:t,yes:{raci:[{role:"Technicien N1",type:"R",action:"À définir"}]},no:{raci:[{role:"Technicien N1",type:"R",action:"À définir"}]}}]},saveData(),renderProductGrid(),closeModal("addCategoryModal")}
+function deleteCategory(e){confirm("Supprimer cette catégorie ?")&&(delete raciData[e],saveData(),renderProductGrid())}
+function showStats(){const e=calculateStats();document.getElementById("statsPanel").innerHTML=`<div class="stat-card"><div class="stat-number">${e.categories}</div><div class="stat-label">Catégories</div></div><div class="stat-card"><div class="stat-number">${e.questions}</div><div class="stat-label">Questions</div></div><div class="stat-card"><div class="stat-number">${e.raci}</div><div class="stat-label">Actions RACI</div></div>`,document.getElementById("statsModal").classList.add("active")}
+function calculateStats(){let e=0,t=0;return Object.values(raciData).forEach(n=>{n.questions&&(e+=n.questions.length,n.questions.forEach(e=>{e.yes?.raci&&(t+=e.yes.raci.length),e.no?.raci&&(t+=e.no.raci.length)}))}),{categories:Object.keys(raciData).length,questions:e,raci:t}}
+function showImportExport(){document.getElementById("importExportModal").classList.add("active")}
+function switchIETab(e){document.querySelectorAll("#importExportModal .tab").forEach(e=>e.classList.remove("active")),"export"===e?(document.querySelector("#importExportModal .tab:first-child").classList.add("active"),document.getElementById("exportTab").style.display="block",document.getElementById("importTab").style.display="none"):(document.querySelector("#importExportModal .tab:last-child").classList.add("active"),document.getElementById("exportTab").style.display="none",document.getElementById("importTab").style.display="block")}
+function exportData(){const e=JSON.stringify(raciData,null,2),t=new Blob([e],{type:"application/json"}),n=URL.createObjectURL(t),a=document.createElement("a");a.href=n,a.download="raci_config_hoppen.json",a.click(),URL.revokeObjectURL(n),showSuccessMessage("Configuration exportée")}
+function importData(e){const t=e.target.files[0];if(!t)return;const n=new FileReader;n.onload=function(e){try{raciData=JSON.parse(e.target.result),saveData(),renderProductGrid(),closeModal("importExportModal"),showSuccessMessage("Import réussi !")}catch(e){alert("Erreur lors de l'import")}},n.readAsText(t)}
+function showTreeView(){document.getElementById("treeViewModal").classList.add("active"),renderTreeView()}
+function renderTreeView(){const e=document.getElementById("treeContent");if(!e)return;if("category"===currentTreeView){let t="";Object.keys(raciData).forEach(e=>{const n=raciData[e];t+=`<div class="tree-view"><div class="category-header"><div class="category-title"><span>${n.icon||"📦"}</span><span contenteditable="true" class="editable-field" onblur="updateCategoryName('${e}', this.textContent)">${n.name}</span></div><div class="tree-actions"><button class="tree-btn tree-btn-add" onclick="addQuestionToCategory('${e}')">+ Question</button><button class="tree-btn tree-btn-delete" onclick="deleteCategory('${e}')">Supprimer</button></div></div>${renderCategoryQuestions(e,n)}</div>`}),e.innerHTML=t||"<p>Aucune catégorie définie</p>"}else renderCompactView()}
+function renderCategoryQuestions(e,t){if(!t.questions||0===t.questions.length)return'<p style="padding:10px;color:#718096">Aucune question définie</p>';let n="";return t.questions.forEach((t,a)=>{const i=0===a,o=a===raciData[e].questions.length-1;n+=`<div class="tree-node"><div class="tree-question"><span contenteditable="true" class="editable-field" onblur="updateQuestionText('${e}', ${a}, this.textContent)">${a+1}. ${t.question}</span><div class="tree-actions">${i?"":`<button class="tree-btn tree-btn-up" onclick="moveQuestion('${e}', ${a}, 'up')" title="Monter">↑</button>`}${o?"":`<button class="tree-btn tree-btn-down" onclick="moveQuestion('${e}', ${a}, 'down')" title="Descendre">↓</button>`}<button class="tree-btn tree-btn-edit" onclick="editQuestion('${e}', ${a})">Éditer</button><button class="tree-btn tree-btn-delete" onclick="deleteQuestion('${e}', ${a})">✕</button></div></div>${renderQuestionResponses(e,a,t)}</div>`}),n}
+function renderQuestionResponses(e,t,n){let a="";return n.yes&&(a+=`<div class="tree-response"><div class="tree-response-label">✓ OUI</div>${renderResponseContent(e,t,"yes",n.yes)}</div>`),n.no&&(a+=`<div class="tree-response"><div class="tree-response-label">✗ NON</div>${renderResponseContent(e,t,"no",n.no)}</div>`),a}
+function renderResponseContent(e,t,n,a){let i="";if(a.next){const o=findQuestionById(a.next),r=o?o.question:"Question non trouvée";i+=`<div style="padding:10px;background:#e6f3ff;border-radius:6px;margin-bottom:10px"><strong style="color:#667eea">➜ Va à la question :</strong> <span style="color:#4a5568">${r}</span><button class="tree-btn tree-btn-edit" style="margin-left:10px" onclick="editNextLink('${e}', ${t}, '${n}')">Modifier le lien</button></div>`}if(a.raci&&a.raci.length>0){a.raci.forEach((a,o)=>{const r=getRaciBadgeStyle(a.type);i+=`<div class="tree-raci-item"><div class="raci-badge" style="${r};width:auto;min-width:25px;padding:2px 6px;height:25px;font-size:11px">${a.type}</div><div class="raci-content" style="font-size:14px"><strong contenteditable="true" class="editable-field" onblur="updateRaciRole('${e}', ${t}, '${n}', ${o}, this.textContent)">${a.role}</strong>: <span contenteditable="true" class="editable-field" onblur="updateRaciAction('${e}', ${t}, '${n}', ${o}, this.textContent)">${a.action}</span><select class="raci-type-selector" onchange="updateRaciType('${e}', ${t}, '${n}', ${o}, this.value)">${Object.keys(raciTypes).map(e=>`<option value="${e}" ${a.type===e?"selected":""}>${e}</option>`).join("")}</select><button class="tree-btn tree-btn-delete" style="margin-left:10px" onclick="deleteRaciItem('${e}', ${t}, '${n}', ${o})">✕</button></div></div>`});i+=`<button class="tree-btn tree-btn-add" style="margin-top:5px" onclick="addRaciItem('${e}', ${t}, '${n}')">+ Ajouter une action</button>`}else a.next||(i+=`<div style="padding:10px;background:#f7fafc;border-radius:6px"><button class="tree-btn tree-btn-add" onclick="addRaciItem('${e}', ${t}, '${n}')">+ Définir les actions</button><button class="tree-btn tree-btn-edit" style="margin-left:10px;background:#667eea" onclick="addNextLink('${e}', ${t}, '${n}')">+ Ajouter un lien vers question</button></div>`);return a.next&&(i+=`<button class="tree-btn tree-btn-delete" style="margin-top:5px" onclick="removeNextLink('${e}', ${t}, '${n}')">Supprimer le lien</button>`),i}
+function updateRaciType(e,t,n,a,i){try{if(!raciData[e]||!raciData[e].questions||!raciData[e].questions[t])return void console.error("Question non trouvée");const o=raciData[e].questions[t][n];o&&o.raci&&o.raci[a]&&(o.raci[a].type=i,saveData(),renderTreeView())}catch(e){console.error("Erreur updateRaciType:",e)}}
+function renderCompactView(){const e=document.getElementById("treeContent");let t='<div class="tree-view">',n=0,a=0;Object.keys(raciData).forEach(e=>{const t=raciData[e];t.questions&&(n+=t.questions.length,t.questions.forEach(e=>{e.yes?.raci&&(a+=e.yes.raci.length),e.no?.raci&&(a+=e.no.raci.length)}))}),Object.keys(raciData).forEach(e=>{const n=raciData[e];t+=`<div style="margin-bottom:10px;padding:10px;background:white;border-radius:8px"><strong>${n.icon||"📦"} ${n.name}</strong>: ${n.questions?n.questions.length:0} questions</div>`}),t+=`<div style="margin-top:20px;padding:15px;background:#f7fafc;border-radius:8px"><strong>Résumé:</strong><br>📊 ${Object.keys(raciData).length} catégories<br>❓ ${n} questions au total<br>📋 ${a} actions RACI définies</div></div>`,e.innerHTML=t}
+function switchTreeTab(e){currentTreeView=e,document.querySelectorAll("#treeViewModal .tab").forEach(e=>e.classList.remove("active")),document.getElementById(e+"Tab").classList.add("active"),renderTreeView()}
+function toggleEditMode(){editMode=!editMode,document.body.classList.toggle("edit-mode"),showSuccessMessage(editMode?"Mode édition activé":"Mode édition désactivé"),renderProductGrid()}
+function showHelp(){document.getElementById("helpModal").classList.add("active")}
+function closeModal(e){const t=document.getElementById(e);t&&t.classList.remove("active")}
+function showSuccessMessage(e){const t=document.createElement("div");t.style.cssText="position:fixed;bottom:20px;right:20px;background:#48bb78;color:white;padding:15px 20px;border-radius:8px;box-shadow:0 5px 20px rgba(0,0,0,0.2);z-index:3000;animation:slideIn 0.3s ease;",t.textContent=e,document.body.appendChild(t),setTimeout(()=>{t.style.animation="fadeOut 0.3s ease",setTimeout(()=>t.remove(),300)},3e3)}
+function editQuestion(e,t){try{raciData[e]&&raciData[e].questions&&raciData[e].questions[t]||console.error("Question non trouvée")}catch(e){console.error("Erreur editQuestion:",e)}}
+function updateQuestionText(e,t,n){if(raciData[e]&&raciData[e].questions&&raciData[e].questions[t]){if(n&&n.trim()){const a=n.replace(/^\d+\.\s*/,"");raciData[e].questions[t].question=a.trim(),saveData()}}else console.error("Question non trouvée")}
+function updateRaciRole(e,t,n,a,i){try{if(!raciData[e]||!raciData[e].questions||!raciData[e].questions[t])return void console.error("Question non trouvée");const o=raciData[e].questions[t][n];o&&o.raci&&o.raci[a]?i&&i.trim()&&(o.raci[a].role=i.trim(),saveData()):console.error("RACI item non trouvé")}catch(e){console.error("Erreur updateRaciRole:",e)}}
+function updateRaciAction(e,t,n,a,i){try{if(!raciData[e]||!raciData[e].questions||!raciData[e].questions[t])return void console.error("Question non trouvée");const o=raciData[e].questions[t][n];o&&o.raci&&o.raci[a]?i&&i.trim()&&(o.raci[a].action=i.trim(),saveData()):console.error("RACI item non trouvé")}catch(e){console.error("Erreur updateRaciAction:",e)}}
+function deleteQuestion(e,t){raciData[e]&&raciData[e].questions?confirm("Supprimer cette question ?")&&(raciData[e].questions.splice(t,1),saveData(),renderTreeView()):console.error("Catégorie non trouvée")}
+function deleteRaciItem(e,t,n,a){try{if(!raciData[e]||!raciData[e].questions||!raciData[e].questions[t])return void console.error("Question non trouvée");const i=raciData[e].questions[t][n];i&&i.raci?(i.raci.splice(a,1),saveData(),renderTreeView()):console.error("RACI non trouvé")}catch(e){console.error("Erreur deleteRaciItem:",e)}}
+function addRaciItem(e,t,n){try{if(!raciData[e]||!raciData[e].questions)return void console.error("Catégorie non trouvée");const a=raciData[e].questions[t];a?(a[n]||(a[n]={}),a[n].raci||(a[n].raci=[]),a[n].raci.push({role:"Nouveau rôle",type:"Action",action:"Nouvelle action"}),saveData(),renderTreeView()):console.error("Question non trouvée")}catch(e){console.error("Erreur addRaciItem:",e)}}
+function addQuestionToCategory(e){if(!raciData[e])return void console.error("Catégorie non trouvée");const t={id:e+"_q"+Date.now(),question:"Nouvelle question ?",yes:{raci:[{role:"Technicien N1",type:"R",action:"À définir"}]},no:{raci:[{role:"Technicien N1",type:"R",action:"À définir"}]}};raciData[e].questions||(raciData[e].questions=[]),raciData[e].questions.push(t),saveData(),renderTreeView()}
+function updateCategoryName(e,t){raciData[e]?t&&t.trim()&&(raciData[e].name=t.trim(),saveData()):console.error("Catégorie non trouvée")}
+function moveQuestion(e,t,n){if(!raciData[e]||!raciData[e].questions)return void console.error("Catégorie ou questions non trouvées");const a=raciData[e].questions;"up"===n&&t>0?([a[t-1],a[t]]=[a[t],a[t-1]],saveData(),renderTreeView(),showSuccessMessage("Question déplacée vers le haut")):"down"===n&&t<a.length-1&&([a[t],a[t+1]]=[a[t+1],a[t]],saveData(),renderTreeView(),showSuccessMessage("Question déplacée vers le bas"))}
+function editNextLink(e,t,n){const a=raciData[e],i=a.questions[t],o=i[n].next,r=document.createElement("div");r.className="modal active",r.innerHTML=`<div class="modal-content" style="max-width:500px"><div class="modal-header"><h2>🔗 Modifier le lien de navigation</h2><p style="color:#718096;font-size:14px">Question : "${i.question}"<br>Réponse : ${n.toUpperCase()}</p></div><div class="form-group"><label>Sélectionnez la question suivante :</label><select id="nextQuestionSelect" style="width:100%;padding:10px"><option value="">-- Aucune (afficher RACI) --</option>${a.questions.map((e,n)=>n!==t?`<option value="${e.id}" ${o===e.id?"selected":""}>${n+1}. ${e.question}</option>`:"").join("")}</select></div><div style="margin-top:20px;padding:15px;background:#f7fafc;border-radius:8px"><strong>💡 Conseil :</strong><br>Si vous sélectionnez une question, la réponse ${n.toUpperCase()} mènera à cette question.<br>Si vous choisissez "Aucune", le RACI sera affiché.</div><div style="margin-top:30px;display:flex;gap:10px"><button class="btn-primary" onclick="saveNextLink('${e}', ${t}, '${n}')">Enregistrer</button><button class="btn-secondary" onclick="this.closest('.modal').remove()">Annuler</button></div></div>`,document.body.appendChild(r)}
+function addNextLink(e,t,n){editNextLink(e,t,n)}
+function saveNextLink(e,t,n){try{const a=document.getElementById("nextQuestionSelect");if(!a)return void console.error("Select non trouvé");if(!raciData[e]||!raciData[e].questions||!raciData[e].questions[t])return void console.error("Question non trouvée");const i=a.value,o=raciData[e].questions[t];o[n]||(o[n]={}),i?o[n].next=i:(delete o[n].next,o[n].raci&&0!==o[n].raci.length||(o[n].raci=[{role:"Technicien N1",type:"R",action:"À définir"}])),saveData();const r=document.querySelector(".modal.active");r&&r.remove(),renderTreeView(),showSuccessMessage("Lien de navigation mis à jour")}catch(e){console.error("Erreur saveNextLink:",e),alert("Erreur lors de la sauvegarde du lien")}}
+function removeNextLink(e,t,n){try{if(!raciData[e]||!raciData[e].questions||!raciData[e].questions[t])return void console.error("Question non trouvée");if(confirm("Supprimer ce lien ? Le RACI sera affiché à la place.")){const a=raciData[e].questions[t];a[n]&&(delete a[n].next,a[n].raci&&0!==a[n].raci.length||(a[n].raci=[{role:"Technicien N1",type:"R",action:"À définir"}])),saveData(),renderTreeView(),showSuccessMessage("Lien supprimé")}}catch(e){console.error("Erreur removeNextLink:",e)}}
+function saveTreeChanges(){saveData(),closeModal("treeViewModal"),showSuccessMessage("Modifications sauvegardées")}
+function saveItemEdit(){closeModal("editItemModal"),saveData(),renderTreeView()}
+window.onclick=function(e){e.target.classList.contains("modal")&&e.target.classList.remove("active")};
+</script>
+</body>
+</html>
